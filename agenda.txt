@@ -1,0 +1,6 @@
+ME FALTA:
+- Campaña Madrid en menciones.
+- Sentimiento de las menciones.
+- ENABLE DATA EXTRACT TABLEAU. (Prio 1)
+- SACAR MÁS TWEETS Y MENCIONES.
+- MACHINE LEARNING MENCIONES.
