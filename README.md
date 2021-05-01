@@ -1,11 +1,11 @@
 
-### :bar_chart: **Political Spanish Sentiment**
+### :bar_chart: Political Spanish Sentiment
 The goal of this project to analyze the social media activity of this profiles and the opinion that they generate into the Spanish population.
 
 To achieve this, I have created a pipeline that extracts tweets of different accounts and mentions of users about them using Tweepy (Twitter API). Then, I have applied a NLP machine learning model to rate the tweets and mentions with a value between 1 and 5 (1 most negative, 5 most positive).
 
 
-![alt text](https://images.pexels.com/photos/3943746/pexels-photo-3943746.jpeg?auto=compress&cs=tinysrgb&dpr=3&h=750&w=1260)
+![alt text](https://github.com/ssarahreyes/political_spanish_sentiment/blob/main/images/README_image.jpeg)
 
 
 ### :sparkles: **Sentiment Analysis (NLP) of Twitter mentions**
@@ -29,7 +29,7 @@ People (Madrid): Isabel Ayuso, Ángel Gabilondo, Edmundo Bal, Rocío Monasterio 
 The result of this analysis it's showed in this [Tableau Dashboard](https://public.tableau.com/profile/sara.hern.ndez#!/vizhome/ih_datamadpt0420_project_m2_16141539604710/DiamondDashboard?publish=yes). 
 
 
-### :fast_forward: **How it works**
+### :fast_forward: How it works
 The main script is locally executed every day in order to get the tweets and mentions of the last day. If you want to execute it, just write:
 
 ```
