@@ -1,6 +1,7 @@
 import pandas as pd
 import tweepy
 import functions as fc
+import numpy as np
 
 """"
 # MENTIONS
@@ -109,7 +110,7 @@ df_final_mentions.to_csv('political_spanish_sentiment_mentions_all.csv', mode='a
 
 print('reading the data frame...')
 
-df_bbdd = pd.read_csv('political_spanish_sentiment_ddbb.csv')
+df_ddbb = pd.read_csv('political_spanish_sentiment_ddbb.csv')
 
 """
 print('Extracting tweets of parties...')
@@ -207,8 +208,14 @@ print('df_final_tweets and ddbb updated!')
 
 # MACHINE LEARNING SENTIMENT
 print('Applying ML to Sentiment Analysis...')
-df_ml = fc.sentiment_classificaton(df_bbdd, df_bbdd['full_text'])
-df_ml.to_csv('political_spanish_sentiment_ddbb_ml.csv')
+
+list_dfs = np.array_split(df_ddbb, 1000)
+
+for idx in range(len(list_dfs)):
+  dataframe = list_dfs[idx]
+  dataframe_ml = fc.sentiment_classificaton(dataframe, dataframe['full_text'])
+  dataframe_ml.to_csv('political_spanish_sentiment_ddbb_ml_2.csv', mode='a', header=False)
+  print(f'{idx}')
 
 print('Finished!')
 

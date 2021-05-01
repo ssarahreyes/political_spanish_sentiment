@@ -2,6 +2,7 @@ import tweepy
 import pandas as pd
 import re
 import datetime
+import numpy as np
 
 # machine learning
 from transformers import pipeline
