@@ -26,7 +26,7 @@ People (Madrid): Isabel Ayuso, Ángel Gabilondo, Edmundo Bal, Rocío Monasterio 
 
 
 ## :bar_chart: **Tableau Dashboard**
-The result of this analysis it's showed in this [Tableau Dashboard](https://public.tableau.com/profile/sara.hern.ndez#!/vizhome/ih_datamadpt0420_project_m2_16141539604710/DiamondDashboard?publish=yes). 
+The result of this analysis it's showed in this [Tableau Dashboard](https://public.tableau.com/profile/sara.hern.ndez#!/vizhome/ih_final_project_sentimiento_poltico/SentimientoPoltici?publish=yes). 
 
 
 # :fast_forward: **How it works**

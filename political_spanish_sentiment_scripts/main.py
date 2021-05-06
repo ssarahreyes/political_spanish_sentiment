@@ -22,8 +22,7 @@ print('Connecting to Tweepy...')
 AUTH = tweepy.OAuthHandler(CONSUMER_KEY, CONSUMER_SECRET)
 AUTH.set_access_token(ACCESS_TOKEN, ACCESS_TOKEN_SECRET)
 API = tweepy.API(AUTH, wait_on_rate_limit=True, wait_on_rate_limit_notify=True)
-print(AUTH)
-print(API)
+
 print('Tweepy connected!')
 
 """
