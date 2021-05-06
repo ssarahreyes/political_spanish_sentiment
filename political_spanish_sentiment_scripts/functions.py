@@ -3,6 +3,9 @@ import pandas as pd
 import re
 import datetime
 import numpy as np
+import os
+from os.path import join, dirname
+from dotenv import load_dotenv
 
 # machine learning
 from transformers import pipeline
@@ -24,23 +27,25 @@ def extracting_tweets(df, account, string_party, string_post_type, string_campai
     Output: a data frame with the last tweets of the accoount indicated.
     """
 
-    # api
-    CONSUMER_KEY = '5lXBIUCjAkOnbIvMlMJn7dlaS'
-    CONSUMER_SECRET = 'qeRlxcGaTmbCkNk1bMtsSlU0tVCAFL928wH8cqPi8VJX4mqkLh'
-    ACCESS_TOKEN = '787642138263683072-JnFO9ahRyIldLnmVCpfx4EP61Z33Jnr'
-    ACCESS_TOKEN_SECRET = 'FPPnZwmV1f6VqqcYzzMtXtxO9TL0wxf2TwNxYMkhfFE6k'
-    BEARER_TOKEN = 'AAAAAAAAAAAAAAAAAAAAALNMOAEAAAAAP%2BesQx5avGgJJ93HpEfmJ5Itg0g%3Df9o5pCoaONvJDna12ko5StopuNOPFZeJrVgd3ykj83Z38IzkiJ'
+    dotenv_path = join(dirname("/Users/sarahr/Ironhack/political_spanish_sentiment/.env.txt"), '.env.txt')
+    load_dotenv(dotenv_path)
 
-    auth = tweepy.OAuthHandler(CONSUMER_KEY, CONSUMER_SECRET)
-    auth.set_access_token(ACCESS_TOKEN, ACCESS_TOKEN_SECRET)
-    api = tweepy.API(auth, wait_on_rate_limit=True, wait_on_rate_limit_notify=True)
+    CONSUMER_KEY = os.environ.get("CONSUMER_KEY")
+    CONSUMER_SECRET = os.environ.get("CONSUMER_SECRET")
+    ACCESS_TOKEN = os.environ.get("ACCESS_TOKEN")
+    ACCESS_TOKEN_SECRET = os.environ.get("ACCESS_TOKEN_SECRET")
+
+    AUTH = tweepy.OAuthHandler(CONSUMER_KEY, CONSUMER_SECRET)
+    AUTH.set_access_token(ACCESS_TOKEN, ACCESS_TOKEN_SECRET)
+    API = tweepy.API(AUTH, wait_on_rate_limit=True, wait_on_rate_limit_notify=True)
 
     # parameters
     last_tweet_id = max(df['id'])
+
     count = 200
 
     # extracting the tweets
-    tweets = [tweet for tweet in tweepy.Cursor(api.user_timeline,
+    tweets = [tweet for tweet in tweepy.Cursor(API.user_timeline,
                                                screen_name=account,
                                                tweet_mode='extended',
                                                exclude_replies=True,
@@ -78,29 +83,62 @@ def extracting_tweets(df, account, string_party, string_post_type, string_campai
     hashtags = [re.findall(r"#(\w+)", tweet) for tweet in list_hashtags]
     df_tweets_filtered['hashtags'] = hashtags
 
+    # sentiment analysis
+    model_name = "nlptown/bert-base-multilingual-uncased-sentiment"
+    model = AutoModelForSequenceClassification.from_pretrained(model_name)
+    tokenizer = AutoTokenizer.from_pretrained(model_name)
+    classifier = pipeline('sentiment-analysis', model=model, tokenizer=tokenizer)
+
+    list_tweets = df_tweets_filtered['full_text'].tolist()
+
+    results = classifier(list_tweets)  # rating tweets
+
+    sentiment_list = []
+    scores = []
+
+    for result in results:
+        scores_list = result['score']
+        scores.append(scores_list)
+
+        for i in range(len(result)):
+            results_list = result['label'][i]
+            if results_list != " ":
+                sentiment_list.append(results_list)
+
+    df_tweets_filtered['sentimiento'] = sentiment_list
+    df_tweets_filtered['scores'] = scores
+
     return df_tweets_filtered
 
 
 
 # UPTDATING BBDD MENTIONS
 
-def extracting_mentions(query):
+def extracting_mentions(query, string_party, string_post_type):
     """
-    This function extract a data frame with the result of a query.
+    This function extract mentions related to the query in the dates indicated inside the function.
+    Input:
+    - query: strings that have to have the tweet.
+    - string_party: 'Partido Popular', 'PSOE'...
+    - string_post_type: 'publicación'
+    - string_campaing: 'general' or 'madrid'
+    Output: a data frame with the last mentions of the query indicated.
     """
-    # api connection
-    CONSUMER_KEY = '5lXBIUCjAkOnbIvMlMJn7dlaS'
-    CONSUMER_SECRET = 'qeRlxcGaTmbCkNk1bMtsSlU0tVCAFL928wH8cqPi8VJX4mqkLh'
-    ACCESS_TOKEN = '787642138263683072-JnFO9ahRyIldLnmVCpfx4EP61Z33Jnr'
-    ACCESS_TOKEN_SECRET = 'FPPnZwmV1f6VqqcYzzMtXtxO9TL0wxf2TwNxYMkhfFE6k'
-    BEARER_TOKEN = 'AAAAAAAAAAAAAAAAAAAAALNMOAEAAAAAP%2BesQx5avGgJJ93HpEfmJ5Itg0g%3Df9o5pCoaONvJDna12ko5StopuNOPFZeJrVgd3ykj83Z38IzkiJ'
 
-    auth = tweepy.OAuthHandler(CONSUMER_KEY, CONSUMER_SECRET)
-    auth.set_access_token(ACCESS_TOKEN, ACCESS_TOKEN_SECRET)
-    api = tweepy.API(auth, wait_on_rate_limit=True, wait_on_rate_limit_notify=True)
+    dotenv_path = join(dirname("/Users/sarahr/Ironhack/political_spanish_sentiment/.env.txt"), '.env.txt')
+    load_dotenv(dotenv_path)
+
+    CONSUMER_KEY = os.environ.get("CONSUMER_KEY")
+    CONSUMER_SECRET = os.environ.get("CONSUMER_SECRET")
+    ACCESS_TOKEN = os.environ.get("ACCESS_TOKEN")
+    ACCESS_TOKEN_SECRET = os.environ.get("ACCESS_TOKEN_SECRET")
+
+    AUTH = tweepy.OAuthHandler(CONSUMER_KEY, CONSUMER_SECRET)
+    AUTH.set_access_token(ACCESS_TOKEN, ACCESS_TOKEN_SECRET)
+    API = tweepy.API(AUTH, wait_on_rate_limit=True, wait_on_rate_limit_notify=True)
 
     # date and amount information
-    count = 15000
+    count = 2000
 
     today = datetime.date.today()
     yest = today - datetime.timedelta(days=1)
@@ -108,8 +146,8 @@ def extracting_mentions(query):
     yest3 = today - datetime.timedelta(days=3)
     week = today - datetime.timedelta(days=7)
     tomorrow = today + datetime.timedelta(days=1)
-    since = week
-    until = yest3
+    since = yest
+    until = today
 
     print(f'Until: {until}')
     print(f'Since: {since}')
@@ -118,13 +156,14 @@ def extracting_mentions(query):
 
     print(f'Getting mentions for {query} since {since} until {until}.')
 
-    mentions = [tweet for tweet in tweepy.Cursor(api.search,
-                                                 q=query + ' -filter:retweets',
+    mentions = [tweet for tweet in tweepy.Cursor(API.search,
+                                                 q=query,
                                                  lang="es",
                                                  tweet_mode='extended',
                                                  until=until,
                                                  since=since,
                                                  result_type="recent").items(count)]
+
     mentions_json = [tweet._json for tweet in mentions]
     df_mentions = pd.json_normalize(mentions_json)
 
@@ -141,6 +180,30 @@ def extracting_mentions(query):
     # cleaning source of the tweet
     list_sources = list(df_mentions_filtered['source'])
     df_mentions_filtered.loc[:, 'source'] = [re.findall(r'\>(.*?)\<', s) for s in list_sources]
+
+    # adding a column with the party
+    df_mentions_filtered['partido'] = string_party
+
+    # adding a column with the type of post (publicación o mención)
+    df_mentions_filtered['tipo de post'] = string_post_type
+
+    # adding the campaing (madrid or general) if the tweet says Madrid.
+    column_list = list(df_mentions_filtered['full_text'])
+
+    campaña = []
+
+    for t in column_list:
+        if 'Madrid' in t:
+            campaña.append('madrid')
+        else:
+            campaña.append('general')
+
+    df_mentions_filtered['campaña'] = campaña
+
+    # extract hashtags (column ['full_text'])
+    list_hashtags = list(df_mentions_filtered['full_text'])
+    hashtags = [re.findall(r"#(\w+)", tweet) for tweet in list_hashtags]
+    df_mentions_filtered['hashtags'] = hashtags
 
     return df_mentions_filtered
 

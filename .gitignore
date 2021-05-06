@@ -136,6 +136,7 @@ dmypy.json
 .idea
 
 #API keys
-keys.txt
+.env.txt
 agenda.txt
 data_bases
+keys.ipynb
