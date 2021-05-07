@@ -1,13 +1,12 @@
+# imports
+
 import tweepy
 import pandas as pd
 import re
 import datetime
-import numpy as np
 import os
 from os.path import join, dirname
 from dotenv import load_dotenv
-
-# machine learning
 from transformers import pipeline
 from transformers import AutoTokenizer, AutoModelForSequenceClassification
 
@@ -60,56 +59,62 @@ def extracting_tweets(df, account, string_party, string_post_type, string_campai
                         'source', 'retweet_count', 'favorite_count', 'user.followers_count',
                         'user.friends_count', 'user.statuses_count']
 
-    df_tweets_filtered = df_tweets[columns_selected]
+    # selecting useful columns if they have new tweets
 
-    # cleaning date time
-    df_tweets_filtered.loc[:, 'created_at'] = pd.to_datetime(df_tweets_filtered['created_at'])
+    if 'user.name' in df_tweets:
+        try:
+            df_tweets_filtered = df_tweets[columns_selected]
 
-    # cleaning source of the tweet
-    list_sources = list(df_tweets_filtered['source'])
-    df_tweets_filtered.loc[:, 'source'] = [re.findall(r'\>(.*?)\<', s) for s in list_sources]
+            # cleaning date time
+            df_tweets_filtered.loc[:, 'created_at'] = pd.to_datetime(df_tweets_filtered['created_at'])
 
-    # adding a column with the party
-    df_tweets_filtered['partido'] = string_party
+            # cleaning source of the tweet
+            list_sources = list(df_tweets_filtered['source'])
+            df_tweets_filtered.loc[:, 'source'] = [re.findall(r'\>(.*?)\<', s) for s in list_sources]
 
-    # adding a column with the type of post (publicación o mención)
-    df_tweets_filtered['tipo de post'] = string_post_type
+            # adding a column with the party
+            df_tweets_filtered['partido'] = string_party
 
-    # adding a column with the type of post (publicación o mención)
-    df_tweets_filtered['campaña'] = string_campaign
+            # adding a column with the type of post (publicación o mención)
+            df_tweets_filtered['tipo de post'] = string_post_type
 
-    # extract hashtags (column ['full_text'])
-    list_hashtags = list(df_tweets_filtered['full_text'])
-    hashtags = [re.findall(r"#(\w+)", tweet) for tweet in list_hashtags]
-    df_tweets_filtered['hashtags'] = hashtags
+            # adding a column with the type of post (publicación o mención)
+            df_tweets_filtered['campaña'] = string_campaign
 
-    # sentiment analysis
-    model_name = "nlptown/bert-base-multilingual-uncased-sentiment"
-    model = AutoModelForSequenceClassification.from_pretrained(model_name)
-    tokenizer = AutoTokenizer.from_pretrained(model_name)
-    classifier = pipeline('sentiment-analysis', model=model, tokenizer=tokenizer)
+            # extract hashtags (column ['full_text'])
+            list_hashtags = list(df_tweets_filtered['full_text'])
+            hashtags = [re.findall(r"#(\w+)", tweet) for tweet in list_hashtags]
+            df_tweets_filtered['hashtags'] = hashtags
 
-    list_tweets = df_tweets_filtered['full_text'].tolist()
+            # sentiment analysis
+            model_name = "nlptown/bert-base-multilingual-uncased-sentiment"
+            model = AutoModelForSequenceClassification.from_pretrained(model_name)
+            tokenizer = AutoTokenizer.from_pretrained(model_name)
+            classifier = pipeline('sentiment-analysis', model=model, tokenizer=tokenizer)
 
-    results = classifier(list_tweets)  # rating tweets
+            list_tweets = df_tweets_filtered['full_text'].tolist()
 
-    sentiment_list = []
-    scores = []
+            results = classifier(list_tweets)  # rating tweets
 
-    for result in results:
-        scores_list = result['score']
-        scores.append(scores_list)
+            sentiment_list = []
+            scores = []
 
-        for i in range(len(result)):
-            results_list = result['label'][i]
-            if results_list != " ":
-                sentiment_list.append(results_list)
+            for result in results:
+                scores_list = result['score']
+                scores.append(scores_list)
 
-    df_tweets_filtered['sentimiento'] = sentiment_list
-    df_tweets_filtered['scores'] = scores
+                for i in range(len(result)):
+                    results_list = result['label'][i]
+                    if results_list != " ":
+                        sentiment_list.append(results_list)
 
-    return df_tweets_filtered
+            df_tweets_filtered['sentimiento'] = sentiment_list
+            df_tweets_filtered['scores'] = scores
 
+            return df_tweets_filtered
+
+        except:
+            return(f'No tweets today for {string_party}!')
 
 
 # UPTDATING BBDD MENTIONS

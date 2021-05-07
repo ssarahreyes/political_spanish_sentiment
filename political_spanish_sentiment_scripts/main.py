@@ -6,25 +6,6 @@ import os
 from os.path import join, dirname
 from dotenv import load_dotenv
 
-
-# api connection
-print('Getting Tweepy API credentials...')
-
-dotenv_path = join(dirname("/Users/sarahr/Ironhack/political_spanish_sentiment/.env.txt"), '.env.txt')
-load_dotenv(dotenv_path)
-
-CONSUMER_KEY = os.environ.get("CONSUMER_KEY")
-CONSUMER_SECRET = os.environ.get("CONSUMER_SECRET")
-ACCESS_TOKEN = os.environ.get("ACCESS_TOKEN")
-ACCESS_TOKEN_SECRET = os.environ.get("ACCESS_TOKEN_SECRET")
-
-print('Connecting to Tweepy...')
-AUTH = tweepy.OAuthHandler(CONSUMER_KEY, CONSUMER_SECRET)
-AUTH.set_access_token(ACCESS_TOKEN, ACCESS_TOKEN_SECRET)
-API = tweepy.API(AUTH, wait_on_rate_limit=True, wait_on_rate_limit_notify=True)
-
-print('Tweepy connected!')
-
 """
 
 # MENTIONS
@@ -95,17 +76,17 @@ list_dfs = np.array_split(df_final_mentions, 50)
 for idx in range(len(list_dfs)):
   dataframe = list_dfs[idx]
   dataframe_ml = fc.sentiment_classificaton(dataframe, dataframe['full_text'])
-  dataframe_ml.to_csv('../data/data_bases/political_spanish_sentiment_ddbb.csv', mode='a', header=False)
+  dataframe_ml.to_csv('../data/data_bases/political_spanish_sentiment_ddbb.csv', mode='a', header=False, index=False)
   print(f'{idx}')
 
 
 print('Mentions and Sentiment Analysis Added to Data Base!')
-"""
 
+"""
 # TWEETS OF PARTIES -> GENERAL
 
 print('Reading the data base...')
-df_bbdd = pd.read_csv('../data/data_bases/political_spanish_sentiment_ddbb.csv')
+df_bbdd = pd.read_csv('../data/data_bases/political_spanish_sentiment_ddbb.csv', index_col=0)
 
 
 print('Extracting tweets of parties and applying sentiment analysis...')
@@ -135,7 +116,7 @@ print('Extracting tweets of Madrid campaign parties...')
 df_pp_madrid = fc.extracting_tweets(df_bbdd, 'ppmadrid', 'Partido Popular', 'publicación', 'madrid')
 
 # PSOE (Madrid)
-#df_psoe_madrid = fc.extracting_tweets(df_bbdd, 'psoe_m', 'PSOE', 'publicación', 'madrid')
+df_psoe_madrid = fc.extracting_tweets(df_bbdd, 'psoe_m', 'PSOE', 'publicación', 'madrid')
 
 # PODEMOS (Madrid)
 df_podemos_madrid = fc.extracting_tweets(df_bbdd, 'podemosmad', 'PODEMOS', 'publicación', 'madrid')
