@@ -117,7 +117,7 @@ def extracting_tweets(df, account, string_party, string_post_type, string_campai
             return(f'No tweets today for {string_party}!')
 
 
-# UPTDATING BBDD MENTIONS
+# mentions
 
 def extracting_mentions(query, string_party, string_post_type):
     """
@@ -149,19 +149,22 @@ def extracting_mentions(query, string_party, string_post_type):
     yest = today - datetime.timedelta(days=1)
     yest2 = today - datetime.timedelta(days=2)
     yest3 = today - datetime.timedelta(days=3)
+    yest5 = today - datetime.timedelta(days=5)
+    yest6 = today - datetime.timedelta(days=6)
     week = today - datetime.timedelta(days=7)
     tomorrow = today + datetime.timedelta(days=1)
-    since = yest
+    since =
     until = today
 
-    print(f'Until: {until}')
     print(f'Since: {since}')
+    print(f'Until: {until}')
 
     # getting the mentions
 
     print(f'Getting mentions for {query} since {since} until {until}.')
 
-    mentions = [tweet for tweet in tweepy.Cursor(API.search,
+    try:
+        mentions = [tweet for tweet in tweepy.Cursor(API.search,
                                                  q=query,
                                                  lang="es",
                                                  tweet_mode='extended',
@@ -169,48 +172,51 @@ def extracting_mentions(query, string_party, string_post_type):
                                                  since=since,
                                                  result_type="recent").items(count)]
 
-    mentions_json = [tweet._json for tweet in mentions]
-    df_mentions = pd.json_normalize(mentions_json)
+        mentions_json = [tweet._json for tweet in mentions]
+        df_mentions = pd.json_normalize(mentions_json)
 
-    # selecting useful columns
-    columns_selected = ['user.name', 'created_at', 'id', 'full_text', 'display_text_range',
-                        'source', 'retweet_count', 'favorite_count', 'user.followers_count',
-                        'user.friends_count', 'user.statuses_count']
+        # selecting useful columns
+        columns_selected = ['user.name', 'created_at', 'id', 'full_text', 'display_text_range',
+                            'source', 'retweet_count', 'favorite_count', 'user.followers_count',
+                            'user.friends_count', 'user.statuses_count']
 
-    df_mentions_filtered = df_mentions[columns_selected]
+        df_mentions_filtered = df_mentions[columns_selected]
 
-    # cleaning date time
-    df_mentions_filtered.loc[:, 'created_at'] = pd.to_datetime(df_mentions_filtered['created_at'])
+        # cleaning date time
+        df_mentions_filtered.loc[:, 'created_at'] = pd.to_datetime(df_mentions_filtered['created_at'])
 
-    # cleaning source of the tweet
-    list_sources = list(df_mentions_filtered['source'])
-    df_mentions_filtered.loc[:, 'source'] = [re.findall(r'\>(.*?)\<', s) for s in list_sources]
+        # cleaning source of the tweet
+        list_sources = list(df_mentions_filtered['source'])
+        df_mentions_filtered.loc[:, 'source'] = [re.findall(r'\>(.*?)\<', s) for s in list_sources]
 
-    # adding a column with the party
-    df_mentions_filtered['partido'] = string_party
+        # adding a column with the party
+        df_mentions_filtered['partido'] = string_party
 
-    # adding a column with the type of post (publicación o mención)
-    df_mentions_filtered['tipo de post'] = string_post_type
+        # adding a column with the type of post (publicación o mención)
+        df_mentions_filtered['tipo de post'] = string_post_type
 
-    # adding the campaing (madrid or general) if the tweet says Madrid.
-    column_list = list(df_mentions_filtered['full_text'])
+        # adding the campaing (madrid or general) if the tweet says Madrid.
+        column_list = list(df_mentions_filtered['full_text'])
 
-    campaña = []
+        campaña = []
 
-    for t in column_list:
-        if 'Madrid' in t:
-            campaña.append('madrid')
-        else:
-            campaña.append('general')
+        for t in column_list:
+            if 'Madrid' in t:
+                campaña.append('madrid')
+            else:
+                campaña.append('general')
 
-    df_mentions_filtered['campaña'] = campaña
+        df_mentions_filtered['campaña'] = campaña
 
-    # extract hashtags (column ['full_text'])
-    list_hashtags = list(df_mentions_filtered['full_text'])
-    hashtags = [re.findall(r"#(\w+)", tweet) for tweet in list_hashtags]
-    df_mentions_filtered['hashtags'] = hashtags
+        # extract hashtags (column ['full_text'])
+        list_hashtags = list(df_mentions_filtered['full_text'])
+        hashtags = [re.findall(r"#(\w+)", tweet) for tweet in list_hashtags]
+        df_mentions_filtered['hashtags'] = hashtags
 
-    return df_mentions_filtered
+        return df_mentions_filtered
+
+    except:
+        print('No mentions today!')
 
 
 # MACHINE LEARNING CLASSIFICATION: 1, 2, 3, 4 OR 5 STARTS

@@ -6,7 +6,15 @@ import os
 from os.path import join, dirname
 from dotenv import load_dotenv
 
-"""
+CONSUMER_KEY = os.environ.get("CONSUMER_KEY")
+CONSUMER_SECRET = os.environ.get("CONSUMER_SECRET")
+ACCESS_TOKEN = os.environ.get("ACCESS_TOKEN")
+ACCESS_TOKEN_SECRET = os.environ.get("ACCESS_TOKEN_SECRET")
+
+AUTH = tweepy.OAuthHandler(CONSUMER_KEY, CONSUMER_SECRET)
+AUTH.set_access_token(ACCESS_TOKEN, ACCESS_TOKEN_SECRET)
+API = tweepy.API(AUTH, wait_on_rate_limit=True, wait_on_rate_limit_notify=True)
+
 
 # MENTIONS
 
@@ -15,14 +23,14 @@ print('Extracting Vox mentions...')
 vox_query = '@vox_es OR "vox" OR "los de vox" OR "el de VOX" OR "la de VOX" ' \
             'OR "Santiago Abascal" OR "Rocío Monasterio" -filter:retweets'
 df_vox_mentions = fc.extracting_mentions(vox_query, 'VOX', 'mención')
-df_vox_mentions.to_csv('../data/data_bases/mentions_of_today.csv')
+#df_vox_mentions.to_csv('../data/data_bases/mentions_of_today.csv')
 
 
 # Menciones Más Madrid
 print('Extracting mentions of Más Madrid...')
 masmad_query = '@MasMadridCM OR "Mas Madrid" OR "Mónica García" OR "Errejón" -filter:retweets'
 df_masmad_mentions = fc.extracting_mentions(masmad_query, 'Más Madrid', 'mención')
-df_masmad_mentions.to_csv('../data/data_bases/mentions_of_today.csv', mode='a', header=False)
+#df_masmad_mentions.to_csv('../data/data_bases/mentions_of_today.csv', mode='a', header=False)
 
 
 # Menciones PP General
@@ -30,7 +38,7 @@ print('Extracting mentions of PP...')
 pp_query = '@populares OR "partido popular" OR "el pp" OR "los del pp" ' \
            'OR "Ayuso" OR "Isabel Díaz Ayuso" OR "Pablo Casado" -filter:retweets'
 df_pp_mentions = fc.extracting_mentions(pp_query, 'Partido Popular', 'mención')
-df_pp_mentions.to_csv('../data/data_bases/mentions_of_today.csv', mode='a', header=False)
+#df_pp_mentions.to_csv('../data/data_bases/mentions_of_today.csv', mode='a', header=False)
 
 
 # Menciones PSOE General
@@ -38,7 +46,7 @@ print('Extracting mentions of PSOE...')
 psoe_query = '@psoe OR "partido socialista" OR "Partido Socialista Obrero Español" ' \
              'OR "el psoe" OR "los del psoe" OR "Pedro Sánchez" OR "Ángel Gabilondo" -filter:retweets'
 df_psoe_mentions = fc.extracting_mentions(psoe_query, 'PSOE','mención')
-df_psoe_mentions.to_csv('../data/data_bases/mentions_of_today.csv', mode='a', header=False)
+#df_psoe_mentions.to_csv('../data/data_bases/mentions_of_today.csv', mode='a', header=False)
 
 
 # Menciones CIUDADANOS General
@@ -46,7 +54,7 @@ print('Extracting mentions of Ciudadanos...')
 ciudadanos_query = '@CiudadanosCs OR "ciudadanos" OR "los de ciudadanos" OR "Inés Arrimadas" ' \
                    'OR "Edmundo Bal" -filter:retweets'
 df_ciudadanos_mentions = fc.extracting_mentions(ciudadanos_query, 'CIUDADANOS', 'mención')
-df_ciudadanos_mentions.to_csv('../data/data_bases/mentions_of_today.csv', mode='a', header=False)
+#df_ciudadanos_mentions.to_csv('../data/data_bases/mentions_of_today.csv', mode='a', header=False)
 
 
 # Menciones PODEMOS General
@@ -54,7 +62,7 @@ print('Extracting mentions of Podemos...')
 podemos_query = '@PODEMOS OR "podemos" OR "los de podemos" OR "podemitas" OR "el de podemos" ' \
                 'OR "el coletas" OR "Pablo Iglesias" OR "el iglesias -filter:retweets'
 df_podemos_mentions = fc.extracting_mentions(podemos_query, 'PODEMOS', 'mención')
-df_podemos_mentions.to_csv('../data/data_bases/mentions_of_today.csv', mode='a', header=False)
+#df_podemos_mentions.to_csv('../data/data_bases/mentions_of_today.csv', mode='a', header=False)
 
 
 
@@ -83,6 +91,7 @@ for idx in range(len(list_dfs)):
 print('Mentions and Sentiment Analysis Added to Data Base!')
 
 """
+
 # TWEETS OF PARTIES -> GENERAL
 
 print('Reading the data base...')
@@ -182,6 +191,8 @@ df_final_tweets = pd.concat(frames_tweets)
 df_final_tweets.to_csv('../data/data_bases/political_spanish_sentiment_ddbb.csv', mode='a', header=False, index=False)
 
 print('Data Base updated!')
+
+"""
 
 
 if __name__ == '__main__':
