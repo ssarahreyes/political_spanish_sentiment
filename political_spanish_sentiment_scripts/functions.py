@@ -153,8 +153,8 @@ def extracting_mentions(query, string_party, string_post_type):
     yest6 = today - datetime.timedelta(days=6)
     week = today - datetime.timedelta(days=7)
     tomorrow = today + datetime.timedelta(days=1)
-    since =
-    until = today
+    since = yest5
+    until = yest3
 
     print(f'Since: {since}')
     print(f'Until: {until}')
